@@ -32,26 +32,36 @@ public class RepasseController {
 	 * @Inject
 	 * @RestClient 
 	 * MunicipioServiceClient dadosMunClient;
-	 * buscaDadosMunicipio.stream().filter(m -> m.getAno() == 2010).forEach(s -> System.out.println(s.getIdhEducacao()));
 	 */
-	
-	public static void main(String[] args) {
-		Agregacao buscaAgregacaoRepasse = new RepasseController().buscaAgregacaoRepasse(2017, 11947);
-		buscaAgregacaoRepasse.getDadosAgregados().entrySet().stream().filter(m -> "Educação".equals(m.getKey())).forEach(System.out::println);
+
+	/**
+	 * 
+	 * @param ano
+	 * @param idMunicipio
+	 * @return
+	 */
+	public Optional<Double> buscaValoresAgregadosEducacao(final int ano, final int idMunicipio) {
+		return buscaValoresAgregadosPorLabel(ano, idMunicipio, "Educação");
 	}
 	
-	public Optional<Double> buscaValoresAgregadosEducacao(final int ano, final int idMunicipio) {
+	/**
+	 * 
+	 * @param ano
+	 * @param idMunicipio
+	 * @param label
+	 * @return
+	 */
+	public Optional<Double> buscaValoresAgregadosPorLabel(final int ano, final int idMunicipio, final String label) {
 		Optional<Entry<Object, Double>> agregacao = buscaAgregacaoRepasse(ano, idMunicipio).getDadosAgregados()
 																						   .entrySet().stream()
-																						   .filter(m -> "Educação".equals(m.getKey()))
+																						   .filter(m -> label.equals(m.getKey()))
 																						   .findAny();
 		if(agregacao.isPresent()) {
 			return Optional.of(agregacao.get().getValue());
 		} else {
-			
+			return Optional.empty();
 		}
 		
-		return Optional.empty();
 	}
 	
 	/**
@@ -68,6 +78,7 @@ public class RepasseController {
 			Municipio municipio = proxy.buscaMunicipio(sigla, nome);
 			return Optional.ofNullable(municipio);
 		} catch (NotFoundException e) {
+			LOGGER.info("Municipio não encontrado: " + nome + " - " + sigla);
 			System.out.println("Municipio não encontrado: " + nome + " - " + sigla);
 			return Optional.empty();
 		}

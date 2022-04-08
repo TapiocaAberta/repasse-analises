@@ -33,30 +33,29 @@ public class IdebCSVController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IdebCSVController.class);
 	private static final String IDEB_CSV_PATH = "/home/pesilva/workspace/code/pessoal/repasse-analises/data/ideb/";
 	
-	
+	/**
+	 * 
+	 * @return
+	 */
 	public List<Ideb> pegaIdebTodosPeriodos() {
 		List<Ideb> todos = new ArrayList<>();
-		
-		/*
-		 * Quero mudar pra map, mas não está rolando! :-(
-		 * List<List<Ideb>> collect = Arrays.asList(Periodo.values()).stream()
-		 * .map(periodo -> converteCSV(periodo, recuperaArquivoPorPeriodo(periodo)))
-		 * .collect(Collectors.toList());
-		 */
-		
 		Arrays.asList(Periodo.values()).forEach(p -> todos.addAll(this.converteCSV(p, recuperaArquivoPorPeriodo(p))));
 		return todos;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public List<Ideb> pegaIdebTodosPeriodosEscolasPublicas() {
 		return pegaIdebTodosPeriodos().stream().filter(Ideb::ehRedePublica).collect(Collectors.toList());
 	}
 	
-	public static void main(String[] args) {
-		List<Ideb> pegaIdebTodsPeriodos = new IdebCSVController().pegaIdebTodosPeriodosEscolasPublicas();
-		System.out.println(pegaIdebTodsPeriodos.size());
-	}
-	
+	/**
+	 * 
+	 * @param periodo
+	 * @return
+	 */
 	private String recuperaArquivoPorPeriodo(final Periodo periodo) {
 		
 		switch (periodo) {

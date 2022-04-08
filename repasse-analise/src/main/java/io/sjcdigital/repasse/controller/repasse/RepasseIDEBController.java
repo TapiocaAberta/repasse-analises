@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ public class RepasseIDEBController {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(RepasseIDEBController.class);
 	
-	private static final List<Integer> ANOS_PRESENTES_REPASSE = Arrays.asList(2011, 2013, 2015, 2017, 2019);
+	private static final List<Integer> ANOS_REPASSE_COM_NOTAS_IDEB = Arrays.asList(2011, 2013, 2015, 2017, 2019);
 	
 	RepasseController repasseController;
 	IdebCSVController idebCSVController;
@@ -54,7 +55,8 @@ public class RepasseIDEBController {
 		try (var writer = Files.newBufferedWriter(Paths.get(filePath + "ideb_repasse.csv"), StandardCharsets.UTF_8)) {
 
 			StatefulBeanToCsv<RepasseIDEB> beanToCsv = new StatefulBeanToCsvBuilder<RepasseIDEB>(writer)
-					.withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER).build();
+																										.withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER)
+																										.build();
 
 			beanToCsv.write(repasses);
 
@@ -63,7 +65,11 @@ public class RepasseIDEBController {
 		}
 	}
 	
-	public List<RepasseIDEB> criaCriaRepasseIDEB( ) {
+	/**
+	 * 
+	 * @return
+	 */
+	public List<RepasseIDEB> criaCriaRepasseIDEB() {
 		
 		LOGGER.info("Criando novo repasse com dados IDEB");
 		
@@ -71,27 +77,33 @@ public class RepasseIDEBController {
 		
 		idebCSVController.pegaIdebTodosPeriodosEscolasPublicas().forEach(ideb -> {
 			
-			Optional<Municipio> municipio = repasseController.buscaMunicipio(ideb.getMunicipio().getEstado().getUf(), ideb.getMunicipio().getNome());
+			String uf = ideb.getMunicipio().getEstado().getUf();
+			String munNome = ideb.getMunicipio().getNome();
+			
+			Optional<Municipio> municipio = repasseController.buscaMunicipio(uf, munNome);
 			
 			if(municipio.isPresent()) {
 				
 				int idMun = municipio.get().getId();
 				
-				List<DadosMunicipio> dadosMunicipio = repasseController.buscaDadosMunicipio(ideb.getMunicipio().getEstado().getUf(), ideb.getMunicipio().getNome());
+				List<DadosMunicipio> dadosMunicipio = repasseController.buscaDadosMunicipio(uf, munNome);
 				
 				ideb.getNotas().forEach(nota -> {
 					
-					if(ANOS_PRESENTES_REPASSE.contains(nota.getAno())) {
+					if(ANOS_REPASSE_COM_NOTAS_IDEB.contains(nota.getAno())) {
 						
 						RepasseIDEB repasseIdeb = new RepasseIDEB();
-						repasseIdeb.setUf(ideb.getMunicipio().getEstado().getUf());
-						repasseIdeb.setMunicipio(ideb.getMunicipio().getNome());
+						repasseIdeb.setUf(uf);
+						repasseIdeb.setMunicipio(munNome);
 						repasseIdeb.setRede(ideb.getRede().getRedeTexto());
 						repasseIdeb.setPeriodo(ideb.getPerido().name());
 						repasseIdeb.setAno(nota.getAno());
 						repasseIdeb.setIdebNota(nota.getNotaIdeb());
 						
-						Optional<DadosMunicipio> dadoMunicipio = dadosMunicipio.stream().filter(dm -> dm.getAno() == nota.getAno()).findFirst();
+						Optional<DadosMunicipio> dadoMunicipio = dadosMunicipio.stream()
+																			   .filter(anoNotaEAnoDadosMunicipio(nota.getAno()))
+																			   .findFirst();
+						
 						Optional<Double> valor = repasseController.buscaValoresAgregadosEducacao(nota.getAno(), idMun);
 						
 						if(valor.isPresent()) {
@@ -113,12 +125,15 @@ public class RepasseIDEBController {
 				});
 			
 		} else {
-			System.out.println("Cidade não Encontrada: " + ideb.getMunicipio().getNome() + "-" + ideb.getMunicipio().getEstado().getUf());
-			LOGGER.error("Cidade não Encontrada: " + ideb.getMunicipio().getNome() + "-" + ideb.getMunicipio().getEstado().getUf());
+			LOGGER.error("Cidade não Encontrada: " + munNome + "-" + uf);
 		}});
 		
 		return repassesIdeb;
 		
+	}
+
+	private Predicate<? super DadosMunicipio> anoNotaEAnoDadosMunicipio(Integer anoNota) {
+		return dm -> dm.getAno() == anoNota;
 	}
 	
 	
