@@ -43,9 +43,11 @@ public class RepasseIDEBController {
 	}
 	
 	public static void main(String[] args) {
+
 		RepasseIDEBController controller = new RepasseIDEBController();
 		List<RepasseIDEB> todos = controller.criaCriaRepasseIDEB();
 		controller.criaCSV(todos, "/home/pesilva/workspace/code/pessoal/repasse-analises/data/ideb_repasse/");
+
 	}
 	
 	public void criaCSV(List<RepasseIDEB> repasses, String filePath) {
@@ -97,27 +99,40 @@ public class RepasseIDEBController {
 						repasseIdeb.setMunicipio(munNome);
 						repasseIdeb.setRede(ideb.getRede().getRedeTexto());
 						repasseIdeb.setPeriodo(ideb.getPerido().name());
-						repasseIdeb.setAno(nota.getAno());
+						repasseIdeb.setAnoIdeb(nota.getAno());
 						repasseIdeb.setIdebNota(nota.getNotaIdeb());
 						
-						Optional<DadosMunicipio> dadoMunicipio = dadosMunicipio.stream()
-																			   .filter(anoNotaEAnoDadosMunicipio(nota.getAno()))
-																			   .findFirst();
-						
-						Optional<Double> valor = repasseController.buscaValoresAgregadosEducacao(nota.getAno(), idMun);
+						/*
+						 * Estamos sempre olhando um ano a frente do IDEB para o valor repassado. 
+						 * Por exemplo: Se a nota é de 2011, o calculo deverá ser feito e repassado para 2012
+						 */
+						Integer anoRepasse = nota.getAno() + 1;
+						Optional<Double> valor = repasseController.buscaValoresAgregadosEducacao(anoRepasse, idMun);
 						
 						if(valor.isPresent()) {
 							repasseIdeb.setValorRepasseEducacao(valor.get());
+							repasseIdeb.setAnoRepasse(anoRepasse);
+						} else {
+							LOGGER.info("Valor de repasse não encontrado para: " + municipio.get().getNome());
 						}
 						
-						if(dadoMunicipio.isPresent()) {
+						//Adiciona Dados do Ultimo IDH relativo ao ano da aplicação prova Ideb
+						Optional<DadosMunicipio> dadoMunicipioIdh = dadosMunicipio.stream()
+																				  .filter(anoUltimoIDH(nota.getAno()))
+																				  .findFirst();
+						
+						if(dadoMunicipioIdh.isPresent()) {
 							
-							repasseIdeb.setIdhEducacao(dadoMunicipio.get().getIdhEducacao());
-							repasseIdeb.setIdhLongevidade(dadoMunicipio.get().getIdhLongevidade());
-							repasseIdeb.setIdhm(dadoMunicipio.get().getIdhm());
-							repasseIdeb.setIdhRenda(dadoMunicipio.get().getIdhm());
-							repasseIdeb.setPopulacao(dadoMunicipio.get().getPopulacao());
+							repasseIdeb.setPopulacao(dadoMunicipioIdh.get().getPopulacao());
+							repasseIdeb.setAnoIdh(dadoMunicipioIdh.get().getAno());
+							repasseIdeb.setIdhEducacao(dadoMunicipioIdh.get().getIdhEducacao());
+							repasseIdeb.setIdhLongevidade(dadoMunicipioIdh.get().getIdhLongevidade());
+							repasseIdeb.setIdhm(dadoMunicipioIdh.get().getIdhm());
+							repasseIdeb.setIdhRenda(dadoMunicipioIdh.get().getIdhm());
 							
+						} else { 
+							System.err.println("Dados não encontrado para: " + municipio.get().getNome() + " no ano de: " + anoUltimoIDH(anoRepasse));
+							LOGGER.info("Dados não encontrado para: " + municipio.get().getNome() + " no ano de: " + anoUltimoIDH(anoRepasse));
 						}
 						
 						repassesIdeb.add(repasseIdeb);
@@ -132,12 +147,16 @@ public class RepasseIDEBController {
 		
 	}
 
-	private Predicate<? super DadosMunicipio> anoNotaEAnoDadosMunicipio(Integer anoNota) {
-		return dm -> dm.getAno() == anoNota;
+	
+	/**
+	 * @param anoNota
+	 * @return
+	 */
+	//TODO: Essa lógica deve ser mudada pra atender anos posteriores à 2020
+	private Predicate<? super DadosMunicipio> anoUltimoIDH(Integer anoNota) {
+		Integer ano = (anoNota >= 2010 && anoNota <= 2020) ? 2010 : 2020;
+		return dm -> dm.getAno() == ano;
 	}
-	
-	
-	
 	
 
 }

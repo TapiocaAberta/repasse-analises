@@ -39,7 +39,9 @@ public class IdebCSVController {
 	 */
 	public List<Ideb> pegaIdebTodosPeriodos() {
 		List<Ideb> todos = new ArrayList<>();
-		Arrays.asList(Periodo.values()).forEach(p -> todos.addAll(this.converteCSV(p, recuperaArquivoPorPeriodo(p))));
+		//List<Periodo> periodos = Arrays.asList(Periodo.values());
+		List<Periodo> periodos = Arrays.asList(Periodo.FUNDAMENTAL_ANOS_INICIAIS);
+		periodos.forEach(p -> todos.addAll(this.converteCSV(p, recuperaArquivoPorPeriodo(p))));
 		return todos;
 	}
 	
@@ -84,7 +86,7 @@ public class IdebCSVController {
 		
 		try (CSVReader reader = new CSVReaderBuilder(new FileReader(arquivo)).withSkipLines(1).build()) {
 			
-			reader.readAll()//.subList(0, 6)
+			reader.readAll().subList(0, 200)
 				  .forEach(linha -> { idebs.add(criaIdeb(linha, periodo)); });
 			
 		} catch (FileNotFoundException e) {

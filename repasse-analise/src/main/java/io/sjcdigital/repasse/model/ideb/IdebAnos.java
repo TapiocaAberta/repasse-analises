@@ -12,15 +12,14 @@ public class IdebAnos {
 	
 	public static Integer[] pegaListaDeAnosPorPeriodo(Periodo periodo) {
 		switch (periodo) {
-		
-		case FUNDAMENTAL_ANOS_INICIAIS:
-			return ANOS_INICIAIS;
-		case FUNDAMENTAL_ANOS_FINAIS:
-			return ANOS_FINAIS;
-		case ENSINO_MEDIO:
-			return ANOS_ENSINO_MEDIO;
-		default:
-			return new Integer[]{};
+			case FUNDAMENTAL_ANOS_INICIAIS:
+				return ANOS_INICIAIS;
+			case FUNDAMENTAL_ANOS_FINAIS:
+				return ANOS_FINAIS;
+			case ENSINO_MEDIO:
+				return ANOS_ENSINO_MEDIO;
+			default:
+				return new Integer[]{};
 		}
 	}
 

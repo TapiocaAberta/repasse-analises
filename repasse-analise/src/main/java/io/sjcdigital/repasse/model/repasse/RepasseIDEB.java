@@ -8,7 +8,7 @@ import com.opencsv.bean.CsvBindByName;
  */
 public class RepasseIDEB {
 
-	@CsvBindByName
+	@CsvBindByName(column = "UF")
 	private String uf;
 
 	@CsvBindByName
@@ -17,11 +17,17 @@ public class RepasseIDEB {
 	@CsvBindByName
 	private String rede;
 
-	@CsvBindByName
+	@CsvBindByName(column = "IDEB_NOTA")
 	private String idebNota;
 
-	@CsvBindByName
-	private int ano;
+	@CsvBindByName(column = "ANO_IDEB")
+	private int anoIdeb;
+	
+	@CsvBindByName(column = "ANO_REPASSE")
+	private int anoRepasse;
+	
+	@CsvBindByName(column = "ANO_IDH")
+	private int anoIdh;
 
 	@CsvBindByName
 	private String periodo;
@@ -32,16 +38,16 @@ public class RepasseIDEB {
 	@CsvBindByName
 	private float idhm;
 
-	@CsvBindByName
+	@CsvBindByName(column = "IDH_EDUCACAO")
 	private float idhEducacao;
 
-	@CsvBindByName
+	@CsvBindByName(column = "IDH_LONGEVIDADE")
 	private float idhLongevidade;
 
-	@CsvBindByName
+	@CsvBindByName(column = "IDH_RENDA")
 	private float idhRenda;
 	
-	@CsvBindByName
+	@CsvBindByName(column = "VALOR_REPASSADO_EDUCACAO")
 	private Double valorRepasseEducacao;
 
 	/**
@@ -101,17 +107,17 @@ public class RepasseIDEB {
 	}
 
 	/**
-	 * @return the ano
+	 * @return the anoIdeb
 	 */
-	public int getAno() {
-		return ano;
+	public int getAnoIdeb() {
+		return anoIdeb;
 	}
 
 	/**
-	 * @param ano the ano to set
+	 * @param anoIdeb the anoIdeb to set
 	 */
-	public void setAno(int ano) {
-		this.ano = ano;
+	public void setAnoIdeb(int ano) {
+		this.anoIdeb = ano;
 	}
 
 	/**
@@ -220,7 +226,7 @@ public class RepasseIDEB {
 		   .append("municipio: ").append(this.municipio).append("\n")
 		   .append("rede: ").append(this.rede).append("\n")
 		   .append("idebNota: ").append(this.idebNota).append("\n")
-		   .append("ano ").append(this.ano).append("\n")
+		   .append("anoIdeb ").append(this.anoIdeb).append("\n")
 		   .append("periodo ").append(this.periodo).append("\n")
 		   .append("populacao ").append(this.populacao).append("\n")
 		   .append("idhm: ").append(this.idhm).append("\n")
@@ -230,6 +236,34 @@ public class RepasseIDEB {
 		   .append("valorRepasseEducacao ").append(this.valorRepasseEducacao);
 		
 		return str.toString();
+	}
+
+	/**
+	 * @return the anoRepasse
+	 */
+	public int getAnoRepasse() {
+		return anoRepasse;
+	}
+
+	/**
+	 * @param anoRepasse the anoRepasse to set
+	 */
+	public void setAnoRepasse(int anoRepasse) {
+		this.anoRepasse = anoRepasse;
+	}
+
+	/**
+	 * @return the anoIdh
+	 */
+	public int getAnoIdh() {
+		return anoIdh;
+	}
+
+	/**
+	 * @param anoIdh the anoIdh to set
+	 */
+	public void setAnoIdh(int anoIdhs) {
+		this.anoIdh = anoIdhs;
 	}
 
 }
