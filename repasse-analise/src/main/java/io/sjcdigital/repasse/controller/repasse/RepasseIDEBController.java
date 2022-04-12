@@ -79,6 +79,8 @@ public class RepasseIDEBController {
 		
 		idebCSVController.pegaIdebTodosPeriodosEscolasPublicas().forEach(ideb -> {
 			
+			System.out.println("Buscando: " + ideb.getMunicipio().getNome() + "-" + ideb.getMunicipio().getEstado().getUf() + " - PERIODO: " + ideb.getPerido());
+			
 			String uf = ideb.getMunicipio().getEstado().getUf();
 			String munNome = ideb.getMunicipio().getNome();
 			
