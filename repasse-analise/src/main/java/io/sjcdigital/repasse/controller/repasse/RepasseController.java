@@ -25,6 +25,7 @@ import io.sjcdigital.repasse.resource.repasse.client.MunicipioServiceClient;
  */
 public class RepasseController {
 	
+	private static final String EDUCAÇÃO = "Educação";
 	public static final String PATH = "http://repasse.icmc.usp.br/rest"; 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RepasseController.class);
 	
@@ -33,6 +34,8 @@ public class RepasseController {
 	 * @RestClient 
 	 * MunicipioServiceClient dadosMunClient;
 	 */
+	
+	
 
 	/**
 	 * 
@@ -41,7 +44,18 @@ public class RepasseController {
 	 * @return
 	 */
 	public Optional<Double> buscaValoresAgregadosEducacao(final int ano, final int idMunicipio) {
-		return buscaValoresAgregadosPorLabel(ano, idMunicipio, "Educação");
+		return buscaValoresAgregadosPorLabel(ano, idMunicipio, EDUCAÇÃO);
+	}
+	
+	
+	/**
+	 * 
+	 * @param ano
+	 * @param idMunicipio
+	 * @return
+	 */
+	public Optional<Double> buscaValoresAgregadosEducacao(final int ano, final int mes, final int idMunicipio) {
+		return buscaValoresAgregadosPorLabel(ano, mes, idMunicipio, EDUCAÇÃO);
 	}
 	
 	/**
@@ -62,6 +76,37 @@ public class RepasseController {
 			return Optional.empty();
 		}
 		
+	}
+	
+	
+	/**
+	 * 
+	 * @param ano
+	 * @param mes
+	 * @param idMunicipio
+	 * @param label
+	 * @return
+	 */
+	public Optional<Double> buscaValoresAgregadosPorLabel(final int ano, final int mes, final int idMunicipio, final String label) {
+
+		Optional<Agregacao> repasse = buscaAgregacaoRepasse(ano, mes, idMunicipio);
+
+		if (repasse.isPresent()) {
+
+			Optional<Entry<Object, Double>> agregacao = repasse.get()
+															   .getDadosAgregados()
+															   .entrySet()
+															   .stream()
+															   .filter(m -> label.equals(m.getKey()))
+															   .findFirst();
+			if (agregacao.isPresent()) {
+				return Optional.of(agregacao.get().getValue());
+			}
+
+		}
+
+		return Optional.empty();
+
 	}
 	
 	/**
@@ -88,13 +133,34 @@ public class RepasseController {
 	/**
 	 * 
 	 * @param ano
+	 * @param mes
+	 * @param idMunicipio
+	 * @return
+	 */
+	public Optional<Agregacao> buscaAgregacaoRepasse(final int ano, final int mes, final long idMunicipio ) {
+		
+		LOGGER.info("Buscando dados de Agregação do Site do Repasse");
+		AgregacaoServiceClient proxy = getTarget().proxy(AgregacaoServiceClient.class);
+		
+		try {
+			return Optional.ofNullable(proxy.agregaPorAreaAnoMesMunicipio(ano, mes, idMunicipio));
+		} catch (NotFoundException e) {
+			LOGGER.info("Repasse não encontrado: " + ano + "/" + mes + ". Para municipio " + idMunicipio);
+			System.out.println("Repasse não encontrado: " + ano + "/" + mes + ". Para municipio " + idMunicipio);
+			return Optional.empty();
+		}
+	}
+	
+	/**
+	 * 
+	 * @param ano
 	 * @param idMunicipio
 	 * @return
 	 */
 	public Agregacao buscaAgregacaoRepasse(final int ano, final long idMunicipio ) {
 		LOGGER.info("Buscando dados de Agregação do Site do Repasse");
 		AgregacaoServiceClient proxy = getTarget().proxy(AgregacaoServiceClient.class);
-		return proxy.agregaPorAnoMunicipio(ano, idMunicipio);
+		return proxy.agregaPorAreaAnoMunicipio(ano, idMunicipio);
 	}
 	
 	/**

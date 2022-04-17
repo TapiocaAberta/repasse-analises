@@ -18,7 +18,11 @@ public interface AgregacaoServiceClient {
 	
 	@GET
 	@Path("/AREA/{ano}/municipio/{idMunicipio}")	
-	public Agregacao agregaPorAnoMunicipio(@PathParam("ano") int ano, @PathParam("idMunicipio") long idMunicipio);
+	public Agregacao agregaPorAreaAnoMunicipio(@PathParam("ano") int ano, @PathParam("idMunicipio") long idMunicipio);
+	
+	@GET
+	@Path("/AREA/{ano}/{mes}/municipio/{idMunicipio}")	
+	public Agregacao agregaPorAreaAnoMesMunicipio(@PathParam("ano") int ano, @PathParam("mes") int mes, @PathParam("idMunicipio") long idMunicipio);
  
 
 }
