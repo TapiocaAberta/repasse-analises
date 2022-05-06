@@ -1,0 +1,57 @@
+---
+title: "01 Tratamento dos Dados"
+author: "pedro-hos@outlook.com"
+date: "5/3/2022"
+---
+
+### Carregando Dados do CSV
+
+```{r}
+library(dplyr)
+ideb_repasse <- read.csv(file = "../../data/ideb_repasse/ideb_repasse.csv")
+```
+
+### Removendo NAs
+
+```{r}
+#ideb_repasse[is.na(ideb_repasse) == TRUE]
+ideb_repasse <- ideb_repasse %>% dplyr::filter(ideb_repasse$ANO_IDH > 0) %>% na.omit()
+```
+
+### Convertendo para factor
+
+```{r}
+ideb_repasse$ANO_IDEB = as.factor(ideb_repasse$ANO_IDEB)
+ideb_repasse$ANO_IDH = as.factor(ideb_repasse$ANO_IDH)
+ideb_repasse$ANO_REPASSE = as.factor(ideb_repasse$ANO_REPASSE)
+
+ideb_repasse$PERIODO = as.factor(ideb_repasse$PERIODO)
+ideb_repasse$UF = as.factor(ideb_repasse$UF)
+ideb_repasse$MUNICIPIO = as.factor(ideb_repasse$MUNICIPIO)
+ideb_repasse$REDE = as.factor(ideb_repasse$REDE)
+```
+
+### Separando os dados por Periodo
+
+```{r}
+anos_iniciais <- ideb_repasse %>% dplyr::filter(PERIODO =="FUNDAMENTAL_ANOS_INICIAIS" & IDH_EDUCACAO > 0)
+anos_finais <- ideb_repasse %>% dplyr::filter(PERIODO=="FUNDAMENTAL_ANOS_FINAIS" & IDH_EDUCACAO > 0)
+ensino_medio <- ideb_repasse %>% dplyr::filter(PERIODO=="ENSINO_MEDIO" & IDH_EDUCACAO > 0)
+
+ideb_media <- ideb_repasse %>% group_by(ANO_IDEB, IDH_LONGEVIDADE, UF, ANO_IDH, IDHM, IDH_RENDA, POPULACAO, VALOR_REPASSADO_EDUCACAO, ANO_REPASSE, IDH_EDUCACAO, MUNICIPIO, REDE) %>% summarise_at(vars(IDEB_NOTA), list(IDEB_MEDIA = mean))
+
+```
+
+### Salvando em u RData
+
+```{r}
+save(ideb_repasse, file = "../../data/ideb_repasse/todos_anos.RData")
+save(anos_iniciais, file = "../../data/ideb_repasse/anos_iniciais.RData")
+save(anos_finais,  file = "../../data/ideb_repasse/anos_finais.RData")
+save(ensino_medio, file = "../../data/ideb_repasse/ensino_medio.RData")
+save(ideb_media, file = "../../data/ideb_repasse/ideb_media.RData")
+```
+
+
+
+

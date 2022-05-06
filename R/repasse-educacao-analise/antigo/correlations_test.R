@@ -21,7 +21,19 @@ data <- dplyr::select(anos_iniciais,
 #                             GRÁFICO DE DISPERSÃO                              #
 #################################################################################
 ggplotly(
-  ggplot(data, aes(x = IDEB_NOTA, y = IDH_EDUCACAO)) +
+  ggplot(data, aes(x = IDEB_MEDIA, y = IDH_EDUCACAO)) +
+    geom_point(color = "#39568CFF", size = 2.5) +
+    geom_smooth(aes(color = "Fitted Values"),
+                method = "lm", se = F, size = 2) +
+    xlab("Distância") +
+    ylab("Tempo") +
+    scale_color_manual("Legenda:",
+                       values = "grey50") +
+    theme_classic()
+)
+
+ggplotly(
+  ggplot(data, aes(x = IDEB_MEDIA, y = VALOR_REPASSADO_EDUCACAO)) +
     geom_point(color = "#39568CFF", size = 2.5) +
     geom_smooth(aes(color = "Fitted Values"),
                 method = "lm", se = F, size = 2) +
@@ -39,7 +51,7 @@ if(!require(devtools)) install.packages("devtools")
 devtools::install_github("kassambara/ggpubr")
 library("ggpubr")
 
-ggscatter(ideb_repasse, x = "VALOR_REPASSADO_EDUCACAO", y = "IDEB_NOTA", 
+ggscatter(data, x = "IDEB_MEDIA", y = "VALOR_REPASSADO_EDUCACAO", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
           xlab = "Valor Repassado para Educação em Reais", ylab = "Nota ideb")
@@ -50,7 +62,7 @@ ggscatter(ideb_repasse, x = "VALOR_REPASSADO_EDUCACAO", y = "IDH_EDUCACAO",
           xlab = "Valor Repassado para Educação em Reais", ylab = "Nota ideb")
 
 shapiro.test(data$VALOR_REPASSADO_EDUCACAO)
-shapiro.test(data$IDEB_NOTA)
+shapiro.test(data$IDEB_MEDIA)
 
 # VALOR_REPASSADO_EDUCACAO
 ggqqplot(ideb_repasse$VALOR_REPASSADO_EDUCACAO, ylab = "MPG")
@@ -59,7 +71,7 @@ ggqqplot(ideb_repasse$VALOR_REPASSADO_EDUCACAO, ylab = "MPG")
 ggqqplot(ideb_repasse$IDEB_NOTA, ylab = "WT")
 
 # Correlação
-res <- cor.test(ideb_repasse$VALOR_REPASSADO_EDUCACAO, ideb_repasse$IDEB_NOTA,
+res <- cor.test(data$VALOR_REPASSADO_EDUCACAO, data$IDEB_MEDIA,
                 method = "pearson")
 res
 

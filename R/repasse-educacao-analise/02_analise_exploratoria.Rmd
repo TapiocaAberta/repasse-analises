@@ -1,0 +1,159 @@
+---
+title: "02 Análise Exploratória"
+author: "pedro-hos@outlook.com"
+date: "5/3/2022"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r render=FALSE}
+library("PerformanceAnalytics")
+library("corrplot")
+library("ggpubr")
+library("ggplot2")
+```
+
+
+Os seguinte arquivos foram carregados:
+
+* todos_anos.RData: contendo os dados para todos os períodos;
+* anos_iniciais.RData: contendo os anos iniciais do ensino fundamental, ou seja de 1º ao 6º ano;
+* anos_finais.RData: contendo os anos finais do ensino fundamental, ou seja de 7º ao 9º ano;
+* ensino_medio.RData: contendo os dados para o ensino médio, do 1º do ensino médio ao 3º do ensino médio.
+*ideb_media.RData: Média das notas do Ideb para os três periodos, respeitando os anos da aplicação e os municípios
+
+```{r}
+load(file = "../../data/ideb_repasse/todos_anos.RData")
+load(file = "../../data/ideb_repasse/anos_iniciais.RData")
+load(file = "../../data/ideb_repasse/anos_finais.RData")
+load(file = "../../data/ideb_repasse/ensino_medio.RData")
+load(file = "../../data/ideb_repasse/ideb_media.RData")
+```
+
+As colunas para todos os períodos se mantém a mesma, como podemos ver a seguir:
+
+```{r}
+colnames(ideb_repasse)
+```
+
+E também possuem a seguinte estrutura, com variáveis nominais, como o caso da coluna **PERIODO** e valores contínuos como o caso de **IDEB_NOTA**:
+
+```{r}
+dplyr::glimpse(ideb_repasse)
+```
+
+Os anos das notas do IDEB para os anos iniciais e finais variam de 2011 à 2019, e os valores do repasse foram coletados sempre respeitando **ANO_IDEB + 1**, ou seja, os repasses de 2012 são para o ano da aplicação do Ideb de 2011, e assim por diante. Os indicadores de IDH são os últimos coletados, em 2010.
+
+* Anos Iniciais
+
+```{r}
+summary(anos_iniciais)
+```
+
+* Anos Finais
+
+```{r}
+summary(anos_finais)
+```
+Já para o Ensino Médio, os anos são de 2017 e 2019.
+
+```{r}
+summary(ensino_medio)
+```
+```{r}
+summary(ideb_media)
+```
+Recuperando apenas as variáveis numericas:
+
+```{r}
+data <- ideb_media[, c(2,5,6,8,10,13)]
+```
+
+```{r}
+sd(data$VALOR_REPASSADO_EDUCACAO)
+sd(data$IDEB_MEDIA)
+```
+
+```{r}
+# Correlação
+cor.test(data$VALOR_REPASSADO_EDUCACAO, data$IDEB_MEDIA, method = "pearson")
+cor.test(data$IDH_EDUCACAO, data$IDEB_MEDIA, method = "pearson")
+cor.test(data$VALOR_REPASSADO_EDUCACAO, data$IDH_EDUCACAO, method = "pearson")
+```
+```{r}
+# VALOR_REPASSADO_EDUCACAO
+
+  ggqqplot(data$VALOR_REPASSADO_EDUCACAO, ylab = "Valor Repassado Educação") + 
+    theme_classic()
+
+```
+```{r}
+# IDEB_NOTA
+  ggqqplot(data$IDEB_MEDIA, ylab = "Nota Ideb Médi") + theme_classic()
+```
+```{r}
+ggscatter(data, x = "IDEB_MEDIA", y = "VALOR_REPASSADO_EDUCACAO", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Valor Repassado para Educação em Reais", ylab = "Nota ideb")
+```
+
+```{r}
+ggscatter(data, x = "VALOR_REPASSADO_EDUCACAO", y = "IDH_EDUCACAO", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Valor Repassado para Educação em Reais", ylab = "Nota ideb")
+```
+```{r}
+ggscatter(data, x = "IDEB_MEDIA", y = "IDH_EDUCACAO", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Valor Repassado para Educação em Reais", ylab = "Nota ideb")
+```
+Nesta visualização com `corrplot` não existe uma correlação forte do valor repassado para educação, com nenhuma outra variável, e exite uma boa correlação entre as notas do Ideb, e os medidores do IDH.
+
+```{r}
+correlations <- cor(data)
+corrplot(correlations, method = "circle")
+```
+Já nesta visualização, podemos ver que existe uma correlação negativa baixa, dos valores repassados para educação, e a nota do Ideb.
+
+```{r}
+data_scale <- scale(data)
+chart.Correlation(data_scale, histogram=TRUE)
+```
+Pelo boxplot, existem alguns potenciais outliers nas notas do Ideb.
+
+```{r}
+boxplot(data$IDEB_MEDIA, main="Ideb Média")
+```
+```{r}
+boxplot(data$IDH_EDUCACAO, main="IDH Educação")
+```
+Essa visualização ficou meio estranha, não sei se teria que fazer algum ajuste:
+
+```{r}
+boxplot(data$VALOR_REPASSADO_EDUCACAO, main="Valor Repassado Para Educação")
+```
+```{r}
+ggplot(data) +
+  aes(x = VALOR_REPASSADO_EDUCACAO) +
+  geom_histogram(bins = 30L, fill = "#0c4c8a") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(data) +
+  aes(x = IDEB_MEDIA) +
+  geom_histogram(bins = 30L, fill = "#0c4c8a") +
+  theme_minimal()
+```
+```{r}
+ggplot(data) +
+    aes(x = IDH_EDUCACAO) +
+  geom_histogram(bins = 30L, fill = "#0c4c8a") +
+  theme_minimal()
+```
+
+
