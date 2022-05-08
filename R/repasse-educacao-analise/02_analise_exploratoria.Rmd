@@ -3,11 +3,12 @@ title: "02 Análise Exploratória"
 author: "pedro-hos@outlook.com"
 date: "5/3/2022"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
 
-```{r render=FALSE}
+```{r, echo=FALSE}
 library("PerformanceAnalytics")
 library("corrplot")
 library("ggpubr")
@@ -23,7 +24,7 @@ Os seguinte arquivos foram carregados:
 * ensino_medio.RData: contendo os dados para o ensino médio, do 1º do ensino médio ao 3º do ensino médio.
 *ideb_media.RData: Média das notas do Ideb para os três periodos, respeitando os anos da aplicação e os municípios
 
-```{r}
+```{r, echo=FALSE}
 load(file = "../../data/ideb_repasse/todos_anos.RData")
 load(file = "../../data/ideb_repasse/anos_iniciais.RData")
 load(file = "../../data/ideb_repasse/anos_finais.RData")
@@ -129,13 +130,31 @@ Pelo boxplot, existem alguns potenciais outliers nas notas do Ideb.
 boxplot(data$IDEB_MEDIA, main="Ideb Média")
 ```
 ```{r}
+out_ideb <- boxplot.stats(data$IDEB_MEDIA)$out
+out_ideb_ind <- which(data$IDEB_MEDIA %in% c(out_ideb))
+data[out_ideb_ind, ]
+
+```
+
+```{r}
 boxplot(data$IDH_EDUCACAO, main="IDH Educação")
+```
+```{r}
+out_idh <-boxplot.stats(data$IDH_EDUCACAO)$out
+out_idh_ind <- which(data$IDH_EDUCACAO %in% c(out_idh))
+data[out_idh_ind, ]
 ```
 Essa visualização ficou meio estranha, não sei se teria que fazer algum ajuste:
 
 ```{r}
 boxplot(data$VALOR_REPASSADO_EDUCACAO, main="Valor Repassado Para Educação")
 ```
+```{r}
+out_repasse <-boxplot.stats(data$VALOR_REPASSADO_EDUCACAO)$out
+out_repasse_ind <- which(data$VALOR_REPASSADO_EDUCACAO %in% c(out_repasse))
+data[out_repasse_ind, ]
+```
+
 ```{r}
 ggplot(data) +
   aes(x = VALOR_REPASSADO_EDUCACAO) +

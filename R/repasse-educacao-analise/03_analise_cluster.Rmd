@@ -1,0 +1,63 @@
+---
+title: "Análise Cluster"
+author: "pedro-hos@outlook.com"
+date: "5/6/2022"
+output: html_document
+---
+
+```{r, echo=FALSE}
+library("tidyverse") #pacote para manipulacao de dados
+library("cluster") #algoritmo de cluster
+library("dendextend") #compara dendogramas
+library("factoextra") #algoritmo de cluster e visualizacao
+library("fpc") #algoritmo de cluster e visualizacao
+library("gridExtra") #para a funcao grid arrange
+```
+
+
+```{r, echo=FALSE}
+load(file = "../../data/ideb_repasse/ideb_media.RData")
+data <- ideb_media
+data <- ideb_media[, c(1,2,3,5,6,8,10,11,13)]
+rownames(data) <- paste(data$MUNICIPIO, data$UF, data$ANO_IDEB, sep = "-")
+data <- data[,-c(1,3,8)]
+```
+
+```{r}
+data.padronized <- (scale(data))
+fviz_nbclust(data.padronized, kmeans, method = "wss")
+```
+
+```{r}
+k7 <- kmeans(data.padronized, centers = 7)
+fviz_cluster(k7, data = data.padronized, main = "Cluster K7", geom = c("point"))
+datafit <- data.frame(k7$cluster)
+ideb_media <-  cbind(ideb_media, datafit)
+```
+
+```{r}
+#Calcular o Cluster
+dbscan <- fpc::dbscan(data.padronized,eps = 0.56, MinPts = 3)
+data$dbscan <- dbscan$cluster
+
+#visualizando em cores os clusters
+
+ggplotly(
+data %>% ggplot() +
+  geom_point(aes(x = IDEB_MEDIA,
+                 y = VALOR_REPASSADO_EDUCACAO,
+                 color = as.factor(dbscan)),
+             size = 3)
+)
+```
+```{r}
+ggplotly(
+data %>% ggplot() +
+  geom_point(aes(x = IDEB_MEDIA,
+                 y = IDH_EDUCACAO,
+                 color = as.factor(dbscan)),
+             size = 3)
+)
+```
+
+
