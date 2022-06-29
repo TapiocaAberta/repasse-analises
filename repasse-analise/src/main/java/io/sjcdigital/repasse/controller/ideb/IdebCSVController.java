@@ -16,13 +16,13 @@ import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 import com.opencsv.exceptions.CsvValidationException;
 
-import io.sjcdigital.repasse.model.base.Estado;
-import io.sjcdigital.repasse.model.base.Municipio;
-import io.sjcdigital.repasse.model.ideb.Ideb;
-import io.sjcdigital.repasse.model.ideb.IdebAnos;
-import io.sjcdigital.repasse.model.ideb.Nota;
-import io.sjcdigital.repasse.model.ideb.Periodo;
-import io.sjcdigital.repasse.model.ideb.Rede;
+import io.sjcdigital.repasse.model.entity.ideb.Periodo;
+import io.sjcdigital.repasse.model.entity.ideb.Rede;
+import io.sjcdigital.repasse.model.pojo.base.EstadoPojo;
+import io.sjcdigital.repasse.model.pojo.base.MunicipioPojo;
+import io.sjcdigital.repasse.model.pojo.ideb.IdebAnosPojo;
+import io.sjcdigital.repasse.model.pojo.ideb.IdebPojo;
+import io.sjcdigital.repasse.model.pojo.ideb.NotaPojo;
 
 /**
  * @author Pedro Hos <pedro-hos@outlook.com>
@@ -37,10 +37,9 @@ public class IdebCSVController {
 	 * 
 	 * @return
 	 */
-	public List<Ideb> pegaIdebTodosPeriodos() {
-		List<Ideb> todos = new ArrayList<>();
+	public List<IdebPojo> pegaIdebTodosPeriodos() {
+		List<IdebPojo> todos = new ArrayList<>();
 		List<Periodo> periodos = Arrays.asList(Periodo.values());
-		//List<Periodo> periodos = Arrays.asList(Periodo.FUNDAMENTAL_ANOS_INICIAIS);
 		periodos.forEach(p -> todos.addAll(this.converteCSV(p, recuperaArquivoPorPeriodo(p))));
 		return todos;
 	}
@@ -49,8 +48,8 @@ public class IdebCSVController {
 	 * 
 	 * @return
 	 */
-	public List<Ideb> pegaIdebTodosPeriodosEscolasPublicas() {
-		return pegaIdebTodosPeriodos().stream().filter(Ideb::ehRedePublica).collect(Collectors.toList());
+	public List<IdebPojo> pegaIdebTodosPeriodosEscolasPublicas() {
+		return pegaIdebTodosPeriodos().stream().filter(IdebPojo::ehRedePublica).collect(Collectors.toList());
 	}
 	
 	/**
@@ -80,13 +79,13 @@ public class IdebCSVController {
 	 * @param arquivo
 	 * @return
 	 */
-	public List<Ideb> converteCSV(final Periodo periodo, final String arquivo) {
+	public List<IdebPojo> converteCSV(final Periodo periodo, final String arquivo) {
 		
-		List<Ideb> idebs = new ArrayList<>();
+		List<IdebPojo> idebs = new ArrayList<>();
 		
 		try (CSVReader reader = new CSVReaderBuilder(new FileReader(arquivo)).withSkipLines(1).build()) {
 			
-			reader.readAll()//.subList(0, 200)
+			reader.readAll()//.subList(0, 12)
 				  .forEach(linha -> { idebs.add(criaIdeb(linha, periodo)); });
 			
 		} catch (FileNotFoundException e) {
@@ -108,10 +107,10 @@ public class IdebCSVController {
 	 * @param periodo
 	 * @return
 	 */
-	public Ideb criaIdeb(final String[] colunas, final Periodo periodo) {
-		Municipio municipio = new Municipio(colunas[1], new Estado(colunas[0]));
+	public IdebPojo criaIdeb(final String[] colunas, final Periodo periodo) {
+		MunicipioPojo municipio = new MunicipioPojo(colunas[1], new EstadoPojo(colunas[0]));
 		Rede rede = Rede.converteRedeStringParaRede(colunas[2]);
-		return new Ideb(periodo, municipio, rede, criaNotasIdeb(colunas, periodo));
+		return new IdebPojo(periodo, municipio, rede, criaNotasIdeb(colunas, periodo));
 	}
 
 	/**
@@ -120,16 +119,16 @@ public class IdebCSVController {
 	 * @param periodo
 	 * @return
 	 */
-	private List<Nota> criaNotasIdeb(final String[] colunas, final Periodo periodo) {
-		List<Nota> notas = new ArrayList<Nota>();
-		Integer[] anosDisp = IdebAnos.pegaListaDeAnosPorPeriodo(periodo);
+	private List<NotaPojo> criaNotasIdeb(final String[] colunas, final Periodo periodo) {
+		List<NotaPojo> notas = new ArrayList<NotaPojo>();
+		Integer[] anosDisp = IdebAnosPojo.pegaListaDeAnosPorPeriodo(periodo);
 		
 		//Atenção, no arquivo as notas devem começar a partir da coluna 3, para montar o sublist
 		List<String> notasCSV = Arrays.asList(colunas).subList(3, (colunas.length));
 		
 		int index = 0;
 		for (String nota : notasCSV) {
-			notas.add(new Nota(anosDisp[index], "-".equals(nota) ? "NA" : nota));
+			notas.add(new NotaPojo(anosDisp[index], "-".equals(nota) ? "NA" : nota));
 			index++;
 		}
 		

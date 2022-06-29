@@ -17,7 +17,7 @@ import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 
 import io.sjcdigital.repasse.controller.repasse.RepasseController;
-import io.sjcdigital.repasse.model.repasse.RepasseMes;
+import io.sjcdigital.repasse.model.pojo.repasse.RepasseMesPojo;
 
 /**
  * @author Pedro Hos <pedro-hos@outlook.com>
@@ -25,13 +25,13 @@ import io.sjcdigital.repasse.model.repasse.RepasseMes;
  */
 public class Main {
 
-	public static void salvaArquivo(final List<RepasseMes> repasses) {
+	public static void salvaArquivo(final List<RepasseMesPojo> repasses) {
 
 		try (var writer = Files.newBufferedWriter(
 				Paths.get("/home/pesilva/workspace/code/pessoal/repasse-analises/data/repasse_ano.csv"),
 				StandardCharsets.UTF_8)) {
 
-			StatefulBeanToCsv<RepasseMes> beanToCsv = new StatefulBeanToCsvBuilder<RepasseMes>(writer)
+			StatefulBeanToCsv<RepasseMesPojo> beanToCsv = new StatefulBeanToCsvBuilder<RepasseMesPojo>(writer)
 					.withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER).build();
 
 			beanToCsv.write(repasses);
@@ -53,7 +53,7 @@ public class Main {
 		Integer idMunicipio = 2865;
 
 		RepasseController controller = new RepasseController();
-		List<RepasseMes> repasses = new ArrayList<>();
+		List<RepasseMesPojo> repasses = new ArrayList<>();
 
 		for (int ano = 2012; ano <= anoFim; ano++) {
 
@@ -65,7 +65,7 @@ public class Main {
 
 				System.out.println("buscando dados para " + data.format(DateTimeFormatter.ISO_DATE));
 
-				RepasseMes repasse = new RepasseMes();
+				RepasseMesPojo repasse = new RepasseMesPojo();
 				repasse.setUf("SP");
 				repasse.setMunicipio("São José dos Campos");
 				repasse.setArea("Educação");

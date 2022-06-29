@@ -6,7 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -19,10 +21,12 @@ import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 
+import io.sjcdigital.repasse.controller.censo.MatriculaController;
 import io.sjcdigital.repasse.controller.ideb.IdebCSVController;
-import io.sjcdigital.repasse.model.base.DadosMunicipio;
-import io.sjcdigital.repasse.model.base.Municipio;
-import io.sjcdigital.repasse.model.repasse.RepasseIDEB;
+import io.sjcdigital.repasse.model.pojo.base.DadosMunicipioPojo;
+import io.sjcdigital.repasse.model.pojo.base.MunicipioPojo;
+import io.sjcdigital.repasse.model.pojo.censo.MatriculaPojo;
+import io.sjcdigital.repasse.model.pojo.repasse.RepasseIdebPojo;
 
 /**
  * @author Pedro Hos <pedro-hos@outlook.com>
@@ -32,7 +36,7 @@ public class RepasseIDEBController {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(RepasseIDEBController.class);
 	
-	private static final List<Integer> ANOS_REPASSE_COM_NOTAS_IDEB = Arrays.asList(2011, 2013, 2015, 2017, 2019);
+	private static final List<Integer> ANOS_REPASSE_COM_NOTAS_IDEB = Arrays.asList(2013, 2015, 2017, 2019);
 	
 	RepasseController repasseController;
 	IdebCSVController idebCSVController;
@@ -43,20 +47,22 @@ public class RepasseIDEBController {
 	}
 	
 	public static void main(String[] args) {
-
+	    
+	    System.out.println("Starting ....");
 		RepasseIDEBController controller = new RepasseIDEBController();
-		List<RepasseIDEB> todos = controller.criaCriaRepasseIDEB();
+		List<RepasseIdebPojo> todos = controller.criaCriaRepasseIDEB();
 		controller.criaCSV(todos, "/home/pesilva/workspace/code/pessoal/repasse-analises/data/ideb_repasse/");
+		System.out.println("Finished ....");
 
 	}
 	
-	public void criaCSV(List<RepasseIDEB> repasses, String filePath) {
+	public void criaCSV(List<RepasseIdebPojo> repasses, String filePath) {
 		
 		LOGGER.info("Salvando CSV em : "  + filePath);
 
 		try (var writer = Files.newBufferedWriter(Paths.get(filePath + "ideb_repasse.csv"), StandardCharsets.UTF_8)) {
 
-			StatefulBeanToCsv<RepasseIDEB> beanToCsv = new StatefulBeanToCsvBuilder<RepasseIDEB>(writer)
+			StatefulBeanToCsv<RepasseIdebPojo> beanToCsv = new StatefulBeanToCsvBuilder<RepasseIdebPojo>(writer)
 																										.withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER)
 																										.build();
 
@@ -71,32 +77,33 @@ public class RepasseIDEBController {
 	 * 
 	 * @return
 	 */
-	public List<RepasseIDEB> criaCriaRepasseIDEB() {
+	public List<RepasseIdebPojo> criaCriaRepasseIDEB() {
 		
 		LOGGER.info("Criando novo repasse com dados IDEB");
 		
-		List<RepasseIDEB> repassesIdeb = new ArrayList<>();
+		List<RepasseIdebPojo> repassesIdeb = new ArrayList<>();
+		Map<String, Collection<MatriculaPojo>> matriculas = new MatriculaController().recuperaMatriculas();
 		
 		idebCSVController.pegaIdebTodosPeriodosEscolasPublicas().forEach(ideb -> {
 			
-			System.out.println("Buscando: " + ideb.getMunicipio().getNome() + "-" + ideb.getMunicipio().getEstado().getUf() + " - PERIODO: " + ideb.getPerido());
+		    LOGGER.info("Buscando: " + ideb.getMunicipio().getNome() + "-" + ideb.getMunicipio().getEstado().getUf() + " - PERIODO: " + ideb.getPerido());
 			
 			String uf = ideb.getMunicipio().getEstado().getUf();
 			String munNome = ideb.getMunicipio().getNome();
 			
-			Optional<Municipio> municipio = repasseController.buscaMunicipio(uf, munNome);
+			Optional<MunicipioPojo> municipioRepasse = repasseController.buscaMunicipio(uf, munNome);
 			
-			if(municipio.isPresent()) {
+			if(municipioRepasse.isPresent()) {
 				
-				int idMun = municipio.get().getId();
+				int idMun = municipioRepasse.get().getId();
 				
-				List<DadosMunicipio> dadosMunicipio = repasseController.buscaDadosMunicipio(uf, munNome);
+				List<DadosMunicipioPojo> dadosMunicipio = repasseController.buscaDadosMunicipio(uf, munNome);
 				
 				ideb.getNotas().forEach(nota -> {
 					
 					if(ANOS_REPASSE_COM_NOTAS_IDEB.contains(nota.getAno())) {
 						
-						RepasseIDEB repasseIdeb = new RepasseIDEB();
+						RepasseIdebPojo repasseIdeb = new RepasseIdebPojo();
 						repasseIdeb.setUf(uf);
 						repasseIdeb.setMunicipio(munNome);
 						repasseIdeb.setRede(ideb.getRede().getRedeTexto());
@@ -105,27 +112,55 @@ public class RepasseIDEBController {
 						repasseIdeb.setIdebNota(nota.getNotaIdeb());
 						
 						/*
-						 * Estamos sempre olhando um ano a frente do IDEB para o valor repassado. 
-						 * Por exemplo: Se a nota é de 2011, o calculo deverá ser feito e repassado para 2012
+						 * Estamos sempre olhando um ano para trás da nota do IDEB para o valor repassado. 
+						 * Por exemplo: Se a nota é de 2011, o calculo deverá ser feito e repassado para 2010
 						 */
-						Integer anoRepasse = nota.getAno() + 1;
+						Integer anoRepasse = nota.getAno() - 1;
+						
+						/*
+						 * Os valores repassados para educação são com base nas matriculas dos anos anteriores. 
+						 */
+						Integer anoMatricula = anoRepasse - 1;
+						
+						
 						Optional<Double> valor = repasseController.buscaValoresAgregadosEducacao(anoRepasse, idMun);
 						
 						if(valor.isPresent()) {
 							repasseIdeb.setValorRepasseEducacao(valor.get());
 							repasseIdeb.setAnoRepasse(anoRepasse);
 						} else {
-							LOGGER.info("Valor de repasse não encontrado para: " + municipio.get().getNome());
+						    System.err.println("Valor de repasse não encontrado para: " + municipioRepasse.get().getNome());
+							LOGGER.info("Valor de repasse não encontrado para: " + municipioRepasse.get().getNome());
+							repasseIdeb.setValorRepasseEducacao(0.0);
+                            repasseIdeb.setAnoRepasse(anoRepasse);
 						}
 						
-						//Adiciona Dados do Ultimo IDH relativo ao ano da aplicação prova Ideb
-						Optional<DadosMunicipio> dadoMunicipioIdh = dadosMunicipio.stream()
+						Optional<MatriculaPojo> matricula = matriculas.get(anoMatricula.toString()).stream()
+						        .filter(MatriculaController.filtraPorPeriodoUFECidade(ideb.getPerido(), ideb.getMunicipio()))
+						        .findFirst();
+						
+						if(matricula.isPresent()) { 
+						    repasseIdeb.setMatricula(matricula.get().getQntMatriculados());
+						    repasseIdeb.setPopulacao(matricula.get().getMunicipio().getPopulacao());
+						    repasseIdeb.setAnoMatriculas(anoMatricula);
+						    repasseIdeb.setRepassePorMatricula();
+						    repasseIdeb.setCodigoMunicipio(matricula.get().getMunicipio().getCodMunicipio());
+						} else {
+						    System.err.println("Matricula não encontrado para o Periodo " + ideb.getPerido() + " Cidade " + munNome + "-" + uf);
+						    LOGGER.info("Matricula não encontrado para o Periodo " + ideb.getPerido() + " Cidade " + munNome + "-" + uf);
+						    repasseIdeb.setPopulacao(0);
+						    repasseIdeb.setMatricula(0);
+						    repasseIdeb.setAnoMatriculas(anoMatricula);
+						    repasseIdeb.setRepassePorMatricula();
+						    repasseIdeb.setCodigoMunicipio("NA");
+						}
+						
+						//Adiciona Dados do Ultimo IDH relativo ao ano da aplicação prova IdebPojo
+						Optional<DadosMunicipioPojo> dadoMunicipioIdh = dadosMunicipio.stream()
 																				  .filter(anoUltimoIDH(nota.getAno()))
 																				  .findFirst();
 						
 						if(dadoMunicipioIdh.isPresent()) {
-							
-							repasseIdeb.setPopulacao(dadoMunicipioIdh.get().getPopulacao());
 							repasseIdeb.setAnoIdh(dadoMunicipioIdh.get().getAno());
 							repasseIdeb.setIdhEducacao(dadoMunicipioIdh.get().getIdhEducacao());
 							repasseIdeb.setIdhLongevidade(dadoMunicipioIdh.get().getIdhLongevidade());
@@ -133,8 +168,8 @@ public class RepasseIDEBController {
 							repasseIdeb.setIdhRenda(dadoMunicipioIdh.get().getIdhm());
 							
 						} else { 
-							System.err.println("Dados não encontrado para: " + municipio.get().getNome() + " no ano de: " + anoUltimoIDH(anoRepasse));
-							LOGGER.info("Dados não encontrado para: " + municipio.get().getNome() + " no ano de: " + anoUltimoIDH(anoRepasse));
+							System.err.println("Dados não encontrado para: " + municipioRepasse.get().getNome() + " no ano de: " + anoUltimoIDH(anoRepasse));
+							LOGGER.info("Dados não encontrado para: " + municipioRepasse.get().getNome() + " no ano de: " + anoUltimoIDH(anoRepasse));
 						}
 						
 						repassesIdeb.add(repasseIdeb);
@@ -155,7 +190,7 @@ public class RepasseIDEBController {
 	 * @return
 	 */
 	//TODO: Essa lógica deve ser mudada pra atender anos posteriores à 2020
-	private Predicate<? super DadosMunicipio> anoUltimoIDH(Integer anoNota) {
+	private Predicate<? super DadosMunicipioPojo> anoUltimoIDH(Integer anoNota) {
 		Integer ano = (anoNota >= 2010 && anoNota <= 2020) ? 2010 : 2020;
 		return dm -> dm.getAno() == ano;
 	}

@@ -20,4 +20,29 @@ for(i in 1:6) {
 
 boxplot(data$VALOR_REPASSADO_EDUCACAO, main="VALOR_REPASSADO_EDUCACAO")
 
+###################################################
 
+install.packages('ffbase')
+
+require(ffbase)
+
+path <- "/home/pesilva/Documents/micodados_educacao/microdados_censo_escolar_2020/microdados_educacao_basica_2020/DADOS" 
+
+docentes <- read.csv(paste(path, "docentes_co.CSV", sep = "/"), sep = "|")
+tail(docentes)
+
+docentes_se <- read.csv2(paste(path, "docentes_sudeste.CSV", sep = "/"), sep = "|")
+head(docentes_se)
+
+matriculas_se <- read.csv2(paste(path, "matricula_sudeste.CSV", sep = "/"), sep = "|")
+
+matriculas_co <- read.csv2(paste(path, "matricula_co.CSV", sep = "/"), sep = "|")
+head(matriculas_co)
+
+
+matricula_sinop <- matriculas_co %>% dplyr::filter(matriculas_co$CO_MUNICIPIO == 5107909)
+head(matricula_sinop)
+colnames(matricula_sinop)
+
+matricula_sinope_creche <- matricula_sinop %>% dplyr::filter(matricula_sinop$TP_ETAPA_ENSINO == 1)
+matricula_sinope_pre <- matricula_sinop %>% dplyr::filter(matricula_sinop$TP_ETAPA_ENSINO == 2)
