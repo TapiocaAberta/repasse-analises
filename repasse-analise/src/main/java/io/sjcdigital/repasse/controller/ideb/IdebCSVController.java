@@ -85,7 +85,7 @@ public class IdebCSVController {
 		
 		try (CSVReader reader = new CSVReaderBuilder(new FileReader(arquivo)).withSkipLines(1).build()) {
 			
-			reader.readAll()//.subList(0, 12)
+			reader.readAll()//.subList(0, 3)
 				  .forEach(linha -> { idebs.add(criaIdeb(linha, periodo)); });
 			
 		} catch (FileNotFoundException e) {

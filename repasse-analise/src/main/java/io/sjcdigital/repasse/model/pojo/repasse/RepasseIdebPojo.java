@@ -4,12 +4,17 @@ import java.util.Objects;
 
 import com.opencsv.bean.CsvBindByName;
 
+import io.sjcdigital.repasse.model.entity.base.FaixaPopulacao;
+
 /**
  * @author Pedro Hos <pedro-hos@outlook.com>
  *
  */
 public class RepasseIdebPojo {
-
+    
+    @CsvBindByName
+    private String regiao;
+    
 	@CsvBindByName(column = "UF")
 	private String uf;
 
@@ -39,6 +44,9 @@ public class RepasseIdebPojo {
 
 	@CsvBindByName
 	private long populacao;
+	
+	@CsvBindByName(column = "FAIXA_POP")
+	private FaixaPopulacao faixa;
 
 	@CsvBindByName
 	private float idhm;
@@ -350,6 +358,34 @@ public class RepasseIdebPojo {
      */
     public void setCodigoMunicipio(String codigoMunicipio) {
         this.codigoMunicipio = codigoMunicipio;
+    }
+
+    /**
+     * @return the regiao
+     */
+    public String getRegiao() {
+        return regiao;
+    }
+
+    /**
+     * @param regiao the regiao to set
+     */
+    public void setRegiao(String regiao) {
+        this.regiao = regiao;
+    }
+
+    /**
+     * @return the faixa
+     */
+    public FaixaPopulacao getFaixa() {
+        return faixa;
+    }
+
+    /**
+     * @param faixa the faixa to set
+     */
+    public void setFaixa(FaixaPopulacao faixa) {
+        this.faixa = faixa;
     }
 
 }

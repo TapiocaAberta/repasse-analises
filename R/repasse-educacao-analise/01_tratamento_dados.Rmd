@@ -15,7 +15,19 @@ ideb_repasse <- read.csv(file = "../../data/ideb_repasse/ideb_repasse.csv")
 
 ```{r}
 #ideb_repasse[is.na(ideb_repasse) == TRUE]
-ideb_repasse <- ideb_repasse %>% dplyr::filter(ideb_repasse$ANO_IDH > 0) %>% na.omit()
+ideb_repasse <- ideb_repasse %>% dplyr::filter(ideb_repasse$ANO_IDH > 0 & ideb_repasse$REPASSE_MATRICULA > 0) %>% na.omit()
+```
+
+```{r}
+ideb_repasse <- ideb_repasse %>% dplyr::mutate(FAIXA_POP = case_when(
+                                    (ideb_repasse$POPULACAO <= 5000) ~ "A",
+                                    (ideb_repasse$POPULACAO > 5000 &  ideb_repasse$POPULACAO <= 10000) ~ "B",
+                                    (ideb_repasse$POPULACAO > 10000 & ideb_repasse$POPULACAO <= 20000) ~ "C",
+                                    (ideb_repasse$POPULACAO > 20000 & ideb_repasse$POPULACAO <= 50000) ~ "D",
+                                    (ideb_repasse$POPULACAO > 50000 & ideb_repasse$POPULACAO <= 100000) ~ "E",
+                                    (ideb_repasse$POPULACAO > 100000 & ideb_repasse$POPULACAO <= 200000) ~ "F",
+                                    (ideb_repasse$POPULACAO > 200000) ~ "G"
+                                  ))
 ```
 
 ### Convertendo para factor
@@ -24,11 +36,14 @@ ideb_repasse <- ideb_repasse %>% dplyr::filter(ideb_repasse$ANO_IDH > 0) %>% na.
 ideb_repasse$ANO_IDEB = as.factor(ideb_repasse$ANO_IDEB)
 ideb_repasse$ANO_IDH = as.factor(ideb_repasse$ANO_IDH)
 ideb_repasse$ANO_REPASSE = as.factor(ideb_repasse$ANO_REPASSE)
+ideb_repasse$ANO_MATRICULA = as.factor(ideb_repasse$ANO_MATRICULA)
 
 ideb_repasse$PERIODO = as.factor(ideb_repasse$PERIODO)
 ideb_repasse$UF = as.factor(ideb_repasse$UF)
 ideb_repasse$MUNICIPIO = as.factor(ideb_repasse$MUNICIPIO)
 ideb_repasse$REDE = as.factor(ideb_repasse$REDE)
+ideb_repasse$CODIGO_MUNICIPIO = as.factor(ideb_repasse$CODIGO_MUNICIPIO)
+ideb_repasse$FAIXA_POP = as.factor(ideb_repasse$FAIXA_POP)
 ```
 
 ### Separando os dados por Periodo
@@ -38,7 +53,26 @@ anos_iniciais <- ideb_repasse %>% dplyr::filter(PERIODO =="FUNDAMENTAL_ANOS_INIC
 anos_finais <- ideb_repasse %>% dplyr::filter(PERIODO=="FUNDAMENTAL_ANOS_FINAIS" & IDH_EDUCACAO > 0)
 ensino_medio <- ideb_repasse %>% dplyr::filter(PERIODO=="ENSINO_MEDIO" & IDH_EDUCACAO > 0)
 
-ideb_media <- ideb_repasse %>% group_by(ANO_IDEB, IDH_LONGEVIDADE, UF, ANO_IDH, IDHM, IDH_RENDA, POPULACAO, VALOR_REPASSADO_EDUCACAO, ANO_REPASSE, IDH_EDUCACAO, MUNICIPIO, REDE) %>% summarise_at(vars(IDEB_NOTA), list(IDEB_MEDIA = mean))
+ideb_media <- ideb_repasse %>% 
+  group_by(ANO_IDEB,
+           ANO_IDH,
+           ANO_MATRICULA,
+           ANO_REPASSE,
+           CODIGO_MUNICIPIO,
+           IDHM,
+           IDH_EDUCACAO,
+           IDH_LONGEVIDADE,
+           IDH_RENDA, 
+           MUNICIPIO,
+           POPULACAO, 
+           REGIAO, 
+           UF, 
+           VALOR_REPASSADO_EDUCACAO, 
+           FAIXA_POP) %>% 
+  summarise(MATRICULA_SUM = sum(MATRICULA), 
+                    REPASSE_MATRICULA = VALOR_REPASSADO_EDUCACAO/MATRICULA_SUM, 
+                    IDEB_MEDIA = mean(IDEB_NOTA)) %>%
+  distinct()
 
 ```
 
@@ -51,7 +85,5 @@ save(anos_finais,  file = "../../data/ideb_repasse/anos_finais.RData")
 save(ensino_medio, file = "../../data/ideb_repasse/ensino_medio.RData")
 save(ideb_media, file = "../../data/ideb_repasse/ideb_media.RData")
 ```
-
-
 
 

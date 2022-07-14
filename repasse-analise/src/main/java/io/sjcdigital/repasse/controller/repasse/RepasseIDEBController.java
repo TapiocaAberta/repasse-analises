@@ -23,6 +23,8 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 
 import io.sjcdigital.repasse.controller.censo.MatriculaController;
 import io.sjcdigital.repasse.controller.ideb.IdebCSVController;
+import io.sjcdigital.repasse.model.entity.base.FaixaPopulacao;
+import io.sjcdigital.repasse.model.entity.base.Regiao;
 import io.sjcdigital.repasse.model.pojo.base.DadosMunicipioPojo;
 import io.sjcdigital.repasse.model.pojo.base.MunicipioPojo;
 import io.sjcdigital.repasse.model.pojo.censo.MatriculaPojo;
@@ -60,7 +62,7 @@ public class RepasseIDEBController {
 		
 		LOGGER.info("Salvando CSV em : "  + filePath);
 
-		try (var writer = Files.newBufferedWriter(Paths.get(filePath + "ideb_repasse.csv"), StandardCharsets.UTF_8)) {
+		try (var writer = Files.newBufferedWriter(Paths.get(filePath + "ideb_repasse-fundeb.csv"), StandardCharsets.UTF_8)) {
 
 			StatefulBeanToCsv<RepasseIdebPojo> beanToCsv = new StatefulBeanToCsvBuilder<RepasseIdebPojo>(writer)
 																										.withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER)
@@ -122,8 +124,8 @@ public class RepasseIDEBController {
 						 */
 						Integer anoMatricula = anoRepasse - 1;
 						
-						
-						Optional<Double> valor = repasseController.buscaValoresAgregadosEducacao(anoRepasse, idMun);
+						//Optional<Double> valor = repasseController.buscaValoresAgregadosEducacao(anoRepasse, idMun);
+						Optional<Double> valor = repasseController.buscaValoresAgregadosFundeb(anoRepasse, idMun);
 						
 						if(valor.isPresent()) {
 							repasseIdeb.setValorRepasseEducacao(valor.get());
@@ -140,19 +142,27 @@ public class RepasseIDEBController {
 						        .findFirst();
 						
 						if(matricula.isPresent()) { 
+						    
+						    Integer habitantes = matricula.get().getMunicipio().getPopulacao();
+						    
 						    repasseIdeb.setMatricula(matricula.get().getQntMatriculados());
-						    repasseIdeb.setPopulacao(matricula.get().getMunicipio().getPopulacao());
+                            repasseIdeb.setPopulacao(habitantes);
+						    repasseIdeb.setFaixa(FaixaPopulacao.porHabitantes(habitantes));
 						    repasseIdeb.setAnoMatriculas(anoMatricula);
 						    repasseIdeb.setRepassePorMatricula();
 						    repasseIdeb.setCodigoMunicipio(matricula.get().getMunicipio().getCodMunicipio());
+						    repasseIdeb.setRegiao(matricula.get().getMunicipio().getEstado().getRegiao().toString());
+						    
 						} else {
 						    System.err.println("Matricula não encontrado para o Periodo " + ideb.getPerido() + " Cidade " + munNome + "-" + uf);
 						    LOGGER.info("Matricula não encontrado para o Periodo " + ideb.getPerido() + " Cidade " + munNome + "-" + uf);
 						    repasseIdeb.setPopulacao(0);
 						    repasseIdeb.setMatricula(0);
+						    repasseIdeb.setFaixa(FaixaPopulacao.porHabitantes(0));
 						    repasseIdeb.setAnoMatriculas(anoMatricula);
 						    repasseIdeb.setRepassePorMatricula();
 						    repasseIdeb.setCodigoMunicipio("NA");
+						    repasseIdeb.setRegiao(Regiao.NAO_ENCONTRADO.toString());
 						}
 						
 						//Adiciona Dados do Ultimo IDH relativo ao ano da aplicação prova IdebPojo

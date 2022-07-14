@@ -6,6 +6,7 @@ import javax.ws.rs.PathParam;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
+import io.sjcdigital.repasse.model.entity.repasse.TipoAgregacao;
 import io.sjcdigital.repasse.model.pojo.repasse.AgregacaoPojo;
 
 /**
@@ -17,12 +18,12 @@ import io.sjcdigital.repasse.model.pojo.repasse.AgregacaoPojo;
 public interface AgregacaoServiceClient {
 	
 	@GET
-	@Path("/AREA/{ano}/municipio/{idMunicipio}")	
-	public AgregacaoPojo agregaPorAreaAnoMunicipio(@PathParam("ano") int ano, @PathParam("idMunicipio") long idMunicipio);
+	@Path("/{tipoAgregacao}/{ano}/municipio/{idMunicipio}")	
+	public AgregacaoPojo agregaPorAreaAnoMunicipio(@PathParam("tipoAgregacao") TipoAgregacao tipoAgregacao, @PathParam("ano") int ano, @PathParam("idMunicipio") long idMunicipio);
 	
 	@GET
-	@Path("/AREA/{ano}/{mes}/municipio/{idMunicipio}")	
-	public AgregacaoPojo agregaPorAreaAnoMesMunicipio(@PathParam("ano") int ano, @PathParam("mes") int mes, @PathParam("idMunicipio") long idMunicipio);
+	@Path("/{tipoAgregacao}/{ano}/{mes}/municipio/{idMunicipio}")	
+	public AgregacaoPojo agregaPorAreaAnoMesMunicipio(@PathParam("tipoAgregacao") TipoAgregacao tipoAgregacao, @PathParam("ano") int ano, @PathParam("mes") int mes, @PathParam("idMunicipio") long idMunicipio);
  
 
 }

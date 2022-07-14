@@ -29,7 +29,7 @@ load(file = "../../data/ideb_repasse/todos_anos.RData")
 load(file = "../../data/ideb_repasse/anos_iniciais.RData")
 load(file = "../../data/ideb_repasse/anos_finais.RData")
 load(file = "../../data/ideb_repasse/ensino_medio.RData")
-load(file = "../../data/ideb_repasse/ideb_media.RData")
+#load(file = "../../data/ideb_repasse/ideb_media.RData")
 ```
 
 As colunas para todos os períodos se mantém a mesma, como podemos ver a seguir:
@@ -63,24 +63,27 @@ Já para o Ensino Médio, os anos são de 2017 e 2019.
 summary(ensino_medio)
 ```
 ```{r}
-summary(ideb_media)
+#summary(ideb_media)
 ```
 Recuperando apenas as variáveis numericas:
 
 ```{r}
-data <- ideb_media[, c(2,5,6,8,10,13)]
+data <- ideb_repasse[, c(6,7,8,9,10,11,14,17,19)]
 ```
 
 ```{r}
 sd(data$VALOR_REPASSADO_EDUCACAO)
-sd(data$IDEB_MEDIA)
+sd(data$REPASSE_MATRICULA)
+sd(data$IDEB_NOTA)
 ```
 
 ```{r}
 # Correlação
-cor.test(data$VALOR_REPASSADO_EDUCACAO, data$IDEB_MEDIA, method = "pearson")
-cor.test(data$IDH_EDUCACAO, data$IDEB_MEDIA, method = "pearson")
+cor.test(data$VALOR_REPASSADO_EDUCACAO, data$IDEB_NOTA, method = "pearson")
+cor.test(data$IDH_EDUCACAO, data$IDEB_NOTA, method = "pearson")
 cor.test(data$VALOR_REPASSADO_EDUCACAO, data$IDH_EDUCACAO, method = "pearson")
+cor.test(data$VALOR_REPASSADO_EDUCACAO, data$REPASSE_MATRICULA, method = "pearson")
+cor.test(data$VALOR_REPASSADO_EDUCACAO, data$MATRICULA, method = "pearson")
 ```
 ```{r}
 # VALOR_REPASSADO_EDUCACAO
@@ -91,7 +94,7 @@ cor.test(data$VALOR_REPASSADO_EDUCACAO, data$IDH_EDUCACAO, method = "pearson")
 ```
 ```{r}
 # IDEB_NOTA
-  ggqqplot(data$IDEB_MEDIA, ylab = "Nota Ideb Médi") + theme_classic()
+  ggqqplot(data$IDEB_NOTA, ylab = "Nota Ideb Médi") + theme_classic()
 ```
 ```{r}
 ggscatter(data, x = "IDEB_MEDIA", y = "VALOR_REPASSADO_EDUCACAO", 
@@ -127,11 +130,11 @@ chart.Correlation(data_scale, histogram=TRUE)
 Pelo boxplot, existem alguns potenciais outliers nas notas do Ideb.
 
 ```{r}
-boxplot(data$IDEB_MEDIA, main="Ideb Média")
+boxplot(data$IDEB_NOTA, main="Ideb Média")
 ```
 ```{r}
-out_ideb <- boxplot.stats(data$IDEB_MEDIA)$out
-out_ideb_ind <- which(data$IDEB_MEDIA %in% c(out_ideb))
+out_ideb <- boxplot.stats(data$IDEB_NOTA)$out
+out_ideb_ind <- which(data$IDEB_NOTA %in% c(out_ideb))
 data[out_ideb_ind, ]
 
 ```
@@ -144,6 +147,11 @@ out_idh <-boxplot.stats(data$IDH_EDUCACAO)$out
 out_idh_ind <- which(data$IDH_EDUCACAO %in% c(out_idh))
 data[out_idh_ind, ]
 ```
+
+```{r}
+boxplot(data$REPASSE_MATRICULA, main="Valor Repassado Para Educação")
+```
+
 Essa visualização ficou meio estranha, não sei se teria que fazer algum ajuste:
 
 ```{r}
@@ -164,7 +172,7 @@ ggplot(data) +
 
 ```{r}
 ggplot(data) +
-  aes(x = IDEB_MEDIA) +
+  aes(x = IDEB_NOTA) +
   geom_histogram(bins = 30L, fill = "#0c4c8a") +
   theme_minimal()
 ```
