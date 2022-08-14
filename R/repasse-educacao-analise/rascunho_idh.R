@@ -1,4 +1,4 @@
-load(file = "../../data/ideb_repasse/todos_anos.RData")
+load(file = "../../data/ideb_repasse/fundeb/todos_anos.RData")
 
 library(ggplot2)
 library(viridis)
@@ -58,3 +58,11 @@ cor.test(faixa_g$IDHM, faixa_g$IDEB_NOTA, method = "pearson")
 cor.test(faixa_g$IDH_EDUCACAO, faixa_g$IDEB_NOTA, method = "pearson")
 cor.test(faixa_g$IDH_RENDA, faixa_g$IDEB_NOTA, method = "pearson")
 cor.test(faixa_g$IDH_LONGEVIDADE, faixa_g$IDEB_NOTA, method = "pearson")
+
+### GRATIFO
+
+col_num <- c(7:11, 18, 20)
+data_num_fin <- ideb_repasse[, col_num]
+
+correlations_fin <- cor(data_num_fin)
+corrplot(correlations_fin, method = "circle")

@@ -1,4 +1,4 @@
-load(file = "../../data/ideb_repasse/anos_iniciais.RData")
+load(file = "../../data/ideb_repasse/fundeb/anos_iniciais.RData")
 
 load(file = "../../data/ideb_repasse/anos_iniciais_out.RData")
 anos_iniciais = data.frame(anos_iniciais_out)
@@ -9,7 +9,9 @@ library(plotly)
 
 ###### ANOS INICIAIS ######
 
-col_num <- c(6:10, 17, 19)
+summary(anos_iniciais)
+
+col_num <- c(7:11, 18, 20)
 data_num_ini <- anos_iniciais[, col_num]
 
 correlations_ini <- cor(data_num_ini)
@@ -70,6 +72,9 @@ cor.test(anos_iniciais_e$REPASSE_MATRICULA, anos_iniciais_e$IDEB_NOTA, method = 
 cor.test(anos_iniciais_f$REPASSE_MATRICULA, anos_iniciais_f$IDEB_NOTA, method = "pearson")
 cor.test(anos_iniciais_g$REPASSE_MATRICULA, anos_iniciais_g$IDEB_NOTA, method = "pearson")
 
+data_scale <- scale(data_num_ini)
+chart.Correlation(data_scale, histogram=TRUE)
+
 # Todos Media
 cor.test(tudo_ini$RPM_MEDIA, tudo_ini$IDEB_MEDIA, method = "pearson")
 
@@ -117,7 +122,6 @@ ggplotly(
     xlab("Ano") + 
     theme_bw()
 )
-
 
 ggscatter(anos_iniciais, x = "IDEB_NOTA", y = "REPASSE_MATRICULA", 
           add = "reg.line", conf.int = TRUE, 

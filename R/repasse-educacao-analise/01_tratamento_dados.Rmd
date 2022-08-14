@@ -8,7 +8,7 @@ date: "5/3/2022"
 
 ```{r}
 library(dplyr)
-ideb_repasse <- read.csv(file = "../../data/ideb_repasse/ideb_repasse.csv")
+ideb_repasse <- read.csv(file = "../../data/ideb_repasse/fundeb/ideb_repasse-fundeb.csv")
 ```
 
 ### Removendo NAs
@@ -79,11 +79,11 @@ ideb_media <- ideb_repasse %>%
 ### Salvando em u RData
 
 ```{r}
-save(ideb_repasse, file = "../../data/ideb_repasse/todos_anos.RData")
-save(anos_iniciais, file = "../../data/ideb_repasse/anos_iniciais.RData")
-save(anos_finais,  file = "../../data/ideb_repasse/anos_finais.RData")
-save(ensino_medio, file = "../../data/ideb_repasse/ensino_medio.RData")
-save(ideb_media, file = "../../data/ideb_repasse/ideb_media.RData")
+save(ideb_repasse, file = "../../data/ideb_repasse/fundeb/todos_anos.RData")
+save(anos_iniciais, file = "../../data/ideb_repasse/fundeb/anos_iniciais.RData")
+save(anos_finais,  file = "../../data/ideb_repasse/fundeb/anos_finais.RData")
+save(ensino_medio, file = "../../data/ideb_repasse/fundeb/ensino_medio.RData")
+save(ideb_media, file = "../../data/ideb_repasse/fundeb/ideb_media.RData")
 ```
 
 

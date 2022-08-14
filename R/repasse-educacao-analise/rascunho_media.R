@@ -17,3 +17,8 @@ cor.test(ideb_repasse_out$REPASSE_MATRICULA, ideb_repasse_out$IDEB_MEDIA, method
 
 sp <- ideb_repasse_out %>% dplyr::filter(UF == "SP")
 cor.test(sp$REPASSE_MATRICULA, sp$IDEB_MEDIA, method = "pearson")
+
+sp_num_ini <- sp[, col_num]
+
+sp_ini <- cor(sp_num_ini)
+corrplot(sp_ini, method = "circle")

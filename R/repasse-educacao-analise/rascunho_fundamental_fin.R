@@ -1,4 +1,4 @@
-load(file = "../../data/ideb_repasse/anos_finais.RData")
+load(file = "../../data/ideb_repasse/fundeb/anos_finais.RData")
 
 library(ggplot2)
 library(viridis)
@@ -6,7 +6,7 @@ library(plotly)
 
 ######### Cor
 
-col_num <- c(6:10, 17, 19)
+col_num <- c(7:11, 18, 20)
 data_num_fin <- anos_finais[, col_num]
 
 correlations_fin <- cor(data_num_fin)

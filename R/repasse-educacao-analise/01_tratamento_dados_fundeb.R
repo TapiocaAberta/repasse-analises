@@ -27,8 +27,9 @@ ideb_fundeb$FAIXA_POP = as.factor(ideb_fundeb$FAIXA_POP)
 anos_iniciais <- ideb_fundeb %>% dplyr::filter(PERIODO =="FUNDAMENTAL_ANOS_INICIAIS" & IDH_EDUCACAO > 0)
 anos_finais <- ideb_fundeb %>% dplyr::filter(PERIODO=="FUNDAMENTAL_ANOS_FINAIS" & IDH_EDUCACAO > 0)
 ensino_medio <- ideb_fundeb %>% dplyr::filter(PERIODO=="ENSINO_MEDIO" & IDH_EDUCACAO > 0)
+fundamental <- ideb_fundeb %>% dplyr::filter(PERIODO =="FUNDAMENTAL_ANOS_INICIAIS" | PERIODO=="FUNDAMENTAL_ANOS_FINAIS")
 
-ideb_fundeb_media <- ideb_fundeb %>% 
+ideb_fundeb_fundamental_media <- fundamental %>% 
   group_by(ANO_IDEB,
            ANO_IDH,
            ANO_MATRICULA,
