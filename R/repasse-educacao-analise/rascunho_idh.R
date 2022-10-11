@@ -1,4 +1,6 @@
-load(file = "../../data/ideb_repasse/fundeb/todos_anos.RData")
+load(file = "../../data/ideb_repasse/fundeb/anos_iniciais.RData")
+load(file = "../../data/ideb_repasse/fundeb/anos_finais.RData")
+fundamental <- rbind(anos_finais, anos_iniciais)
 
 library(ggplot2)
 library(viridis)
@@ -6,20 +8,20 @@ library(plotly)
 
 ######### Tratamento
 
-faixa_a <- ideb_repasse %>% dplyr::filter(FAIXA_POP == "A")
-faixa_b <- ideb_repasse %>% dplyr::filter(FAIXA_POP == "B")
-faixa_c <- ideb_repasse %>% dplyr::filter(FAIXA_POP == "C")
-faixa_d <- ideb_repasse %>% dplyr::filter(FAIXA_POP == "D")
-faixa_e <- ideb_repasse %>% dplyr::filter(FAIXA_POP == "E")
-faixa_f <- ideb_repasse %>% dplyr::filter(FAIXA_POP == "F")
-faixa_g <- ideb_repasse %>% dplyr::filter(FAIXA_POP == "G")
+faixa_a <- fundamental %>% dplyr::filter(FAIXA_POP == "A")
+faixa_b <- fundamental %>% dplyr::filter(FAIXA_POP == "B")
+faixa_c <- fundamental %>% dplyr::filter(FAIXA_POP == "C")
+faixa_d <- fundamental %>% dplyr::filter(FAIXA_POP == "D")
+faixa_e <- fundamental %>% dplyr::filter(FAIXA_POP == "E")
+faixa_f <- fundamental %>% dplyr::filter(FAIXA_POP == "F")
+faixa_g <- fundamental %>% dplyr::filter(FAIXA_POP == "G")
 
 # Todos
 
-cor.test(ideb_repasse$IDEB_NOTA, ideb_repasse$IDHM, method = "pearson")
-cor.test(ideb_repasse$IDEB_NOTA, ideb_repasse$IDH_EDUCACAO, method = "pearson")
-cor.test(ideb_repasse$IDEB_NOTA, ideb_repasse$IDH_RENDA, method = "pearson")
-cor.test(ideb_repasse$IDEB_NOTA, ideb_repasse$IDH_LONGEVIDADE, method = "pearson")
+cor.test(fundamental$IDEB_NOTA, fundamental$IDHM, method = "pearson")
+cor.test(fundamental$IDEB_NOTA, fundamental$IDH_EDUCACAO, method = "pearson")
+cor.test(fundamental$IDEB_NOTA, fundamental$IDH_RENDA, method = "pearson")
+cor.test(fundamental$IDEB_NOTA, fundamental$IDH_LONGEVIDADE, method = "pearson")
 
 # Por Faixa sem média
 

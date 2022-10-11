@@ -6,11 +6,12 @@ library(plotly)
 
 ######### Cor
 
-col_num <- c(7:11, 18, 20)
+col_num <- c("IDEB_NOTA", "IDHM", "IDH_EDUCACAO", "IDH_LONGEVIDADE", 
+             "IDH_RENDA", "REPASSE_MATRICULA", "POPULACAO", "MATRICULA")
 data_num_fin <- anos_finais[, col_num]
 
-correlations_fin <- cor(data_num_fin)
-corrplot(correlations_fin, method = "circle")
+correlations_fin <- cor(data_num_fin[, c("IDEB_NOTA", "REPASSE_MATRICULA")])
+corrplot(correlations_fin, method = "number")
 
 ######### Tratamento
 

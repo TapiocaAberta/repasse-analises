@@ -1,7 +1,6 @@
 load(file = "../../data/ideb_repasse/fundeb/anos_iniciais.RData")
-
-load(file = "../../data/ideb_repasse/anos_iniciais_out.RData")
-anos_iniciais = data.frame(anos_iniciais_out)
+#load(file = "../../data/ideb_repasse/anos_iniciais_out.RData")
+#anos_iniciais = data.frame(anos_iniciais_out)
 
 library(ggplot2)
 library(viridis)
@@ -11,11 +10,12 @@ library(plotly)
 
 summary(anos_iniciais)
 
-col_num <- c(7:11, 18, 20)
+col_num <- c("IDEB_NOTA", "IDHM", "IDH_EDUCACAO", "IDH_LONGEVIDADE", 
+             "IDH_RENDA", "REPASSE_MATRICULA", "POPULACAO", "MATRICULA")
 data_num_ini <- anos_iniciais[, col_num]
 
-correlations_ini <- cor(data_num_ini)
-corrplot(correlations_ini, method = "circle")
+correlations_ini <- cor(data_num_ini[, c("IDEB_NOTA", "REPASSE_MATRICULA")])
+corrplot(correlations_ini, method = "number")
 
 ######### Tratamento
 
@@ -60,7 +60,7 @@ dplyr::n_distinct(anos_iniciais_g$CODIGO_MUNICIPIO)
 
 # Todos
 
-cor.test(anos_iniciais$REPASSE_MATRICULA, anos_iniciais$IDEB_NOTA, method = "pearson", )
+cor.test(anos_iniciais$REPASSE_MATRICULA, anos_iniciais$IDEB_NOTA, method = "pearson")
 
 # Por Faixa sem média
 
